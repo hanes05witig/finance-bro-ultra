@@ -26,8 +26,9 @@
   --brass:#E6B84A;--brass-soft:rgba(230,184,74,.14);--in:#5CC99B;--out:#F2715F;--onbrass:#1E1605;--shadow:0 1px 4px rgba(0,0,0,.45);color-scheme:dark;}
 }
 *{box-sizing:border-box}
-html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-gutter:stable;overflow-y:scroll;overflow-x:hidden}
-body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:16px/1.45 'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+#scroller{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;touch-action:manipulation}
 button:active{transform:scale(.97)}
@@ -223,7 +224,7 @@ input.plain{border-bottom:1px dashed var(--line);border-radius:0}
 </style>
 </head>
 <body>
-<div id="app"><main id="view"></main></div>
+<div id="scroller"><div id="app"><main id="view"></main></div></div>
 <button class="fab" data-action="add" aria-label="Buchung eintragen"></button>
 <nav class="tabs" id="tabs"></nav>
 <div id="backdrop" data-action="close"></div>
@@ -790,7 +791,7 @@ function settingsPicker(k){
 /* ---------- Events ---------- */
 document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(!el)return;const a=el.dataset.action,id=el.dataset.id,v=el.dataset.v;
   switch(a){
-  case'tab':UI.tab=v;render();window.scrollTo(0,0);break;
+  case'tab':UI.tab=v;render();$('#scroller').scrollTop=0;break;
   case'prev':UI.offset--;render();break;
   case'next':UI.offset++;render();break;
   case'add':openAdd();break;
@@ -822,7 +823,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-action]')
     if(D&&D.cur===v){D.rate=fmtRate(r);const i=document.querySelector('[data-field=rate]');if(i)i.value=D.rate;const c=$('#d-conv');if(c)c.textContent=convText()}
     const ti=document.querySelector('[data-travel=rate]');if(ti&&S.travel.currency===v)ti.value=fmtRate(r);toast(`Kurs geladen: 1 ${symbolOf(base())} = ${fmtRate(r)} ${v}`)});break;
   case'ovtype':UI.ovType=v;render();break;
-  case'filtercat':UI.tab='activity';UI.f={...UI.f,cat:id||'all',type:UI.ovType};render();window.scrollTo(0,0);break;
+  case'filtercat':UI.tab='activity';UI.f={...UI.f,cat:id||'all',type:UI.ovType};render();$('#scroller').scrollTop=0;break;
   case'editbudget':openBudget();break;
   case'savebudget':{const B=S.budget;B.total=r2(parseAmount($('#b-total').value)||0);const c={};document.querySelectorAll('[data-bcat]').forEach(i=>{const x=parseAmount(i.value);if(x>0)c[i.dataset.bcat]=r2(x)});B.cats=c;
     delete B.overrides[period(0).start];const roll=$('#b-roll').checked;if(roll&&!B.rollover)B.rolloverStart=period(0).start;B.rollover=roll;save();closeSheet();toast('Budget gespeichert');break}
